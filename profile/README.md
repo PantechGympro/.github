@@ -69,6 +69,23 @@ dev-carlos ───┘                      de pruebas)   release)
   `preview`/`production`) en vez de un despliegue de servidor, pero siguen el mismo
   flujo de promoción.
 
+### Sincronización automática (`main → dev-*`)
+
+Los 4 repos tienen un workflow (`.github/workflows/sync-dev-branches.yml`) que, cada vez
+que algo se mergea a `main`, fusiona automáticamente `main` en las 4 ramas
+`dev-<nombre>` y hace push del resultado. Así nadie tiene que mergear a mano para
+mantenerse al día — solo `git pull` en su rama local.
+
+Solo se propaga código que ya pasó por Pull Request + review a `main`; el trabajo en
+progreso de cada `dev-<nombre>` nunca se cruza con el de otro directamente (se evaluó un
+mesh de sincronización dev-a-dev sin revisión, pero se descartó por el riesgo de
+propagar código roto o a medias entre ramas de distintas personas).
+
+Si `main` trae un cambio que choca con algo sin mergear en una `dev-<nombre>` (conflicto
+real, ambos tocaron lo mismo sin pasar por PR), el job de esa rama falla con un mensaje
+claro en la pestaña *Actions* del repo — las demás se sincronizan igual, y esa queda
+pendiente de resolución manual (`git merge main`, resolver, `git push`).
+
 ### Ramas por funcionalidad (`feature/*`)
 
 No existe una rama `feature` fija. Cuando alguien empieza algo nuevo, crea su propia
